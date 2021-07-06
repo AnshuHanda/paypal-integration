@@ -8,6 +8,7 @@ This repository contains the code for integrating Paypal API in your application
 3. Capture Order
 
 **Flow Diagram**: 
+![image](https://user-images.githubusercontent.com/4496970/124567361-8f29b000-de61-11eb-9309-04914e55f6f9.png)
 
 The flow incldues how the user can place an order via paypal account and check the recent successfull transactions.
 
