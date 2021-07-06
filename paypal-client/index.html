@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang=en>
+
+<head>
+    <meta charset=utf-8>
+    <title>Paypal Test Integration</title>
+</head>
+
+<style type="text/css">
+	body, h1{
+    	text-align: center;
+	}
+	body{
+		margin-top: 5%;
+	}
+	#main-content input{
+        margin: auto;
+        text-align: center;
+		width: 25%;
+	    margin-top: 20px;
+	    text-align: center;
+	    background-color: #efe69e;
+	    border-radius: 10px;
+        border-width:  1px;
+	    height: 30px;
+	    cursor: pointer;
+	    border-color:  grey;
+	    font-size:  14px;
+	}
+	#main-content{
+		text-align: center;
+	}
+	#main-content #transaction-button{
+		background-color: #abf6ff;
+	}
+    #side-content input{
+        height: 20px;
+        margin-top: 20px;
+        text-align: center;
+        height: 30px;
+    }
+
+    #buy-button, #get-tranc{
+        background-color: #8bc34a;
+        border-radius: 10px;
+        border-color:  black;
+        font-size:  14px;
+        border-width:  1px;
+        border-color:  grey;
+        cursor: pointer;
+    }
+    #trans-table{
+        display: none;
+        width: 70%;
+    }
+    #trans-table, tr, td, th{
+        border:  1px solid grey;
+    }
+</style>
+
+<body>
+    <h1>Paypal Integration</h1>
+   	<div id="main-content">
+    	<input id ="transaction-button" type="text" onclick="appendHTML(false)" value = "Check Transaction">
+    	<input id ="order-button" type="text" onclick="appendHTML(true)" value = "Place Order">
+    </div>
+    <div id="side-content"> </div>
+    <div>
+        <table id="trans-table">
+            <tr>
+                <th>Transaction Id</th>
+                <th>Created At</th>
+                <th>Email</th>
+                <th>Order Status</th>
+                <th>Amount</th>
+                <th>Country Code</th>
+            </tr>
+
+        </table>    
+    </div>
+                
+</body>
+<script type="text/javascript">
+var appendHTML = (params) =>{
+    if (params){
+        document.getElementById('side-content').innerHTML = '<span> Price: </span><input type="text" id ="price-value">  <input type="text" id ="buy-button" onclick="submitOrder()" value = "Buy Now"> ';
+    }else{
+        document.getElementById('side-content').innerHTML = '<span> Email: </span><input type="text" id ="client-email">   <input type="text" id ="get-tranc" onclick="checkTransactions()" value = "Get Data"> '
+    }
+}
+var submitOrder = () => {
+	document.getElementById('buy-button').disabled = true;
+    var data = JSON.stringify({
+        "price": document.getElementById('price-value').value
+    });
+
+    var xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+
+    xhr.addEventListener("readystatechange", function() {
+        if (this.readyState === 4) {
+            response = JSON.parse(this.responseText);
+            let redirect_url;
+            response['links'].forEach(function(arrayItem) {
+                if (arrayItem.rel == "approve") {
+                    redirect_url = arrayItem.href;
+                }
+
+            });
+            console.log(redirect_url);
+            window.location = redirect_url;
+        }
+    });
+
+    xhr.open("POST", "http://localhost:3000/order");
+    xhr.setRequestHeader("Content-Type", "application/json");
+
+    xhr.send(data);
+}
+
+var checkTransactions = () =>{
+    let email = document.getElementById('client-email').value;
+
+    var xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+
+    xhr.addEventListener("readystatechange", function() {
+        if (this.readyState === 4) {
+            response = JSON.parse(this.responseText);
+            let tableRef = document.getElementById("trans-table");
+            if (!response.length){
+                document.getElementById("trans-table").innetHTML = '';
+                document.getElementById("trans-table").style.display = "none"
+            }
+            else{
+                document.getElementById("trans-table").style.display = "block";
+                response.forEach(item=>{ 
+                    let newRow = tableRef.insertRow(-1);
+                    let newCell = newRow.insertCell(0);
+                    newCell.appendChild(document.createTextNode(item.transactionId));
+
+                    newCell = newRow.insertCell(1);
+                    newCell.appendChild(document.createTextNode(item.createdAt));
+
+                    newCell = newRow.insertCell(2);
+                    newCell.appendChild(document.createTextNode(item.emailAddress));
+
+                    newCell = newRow.insertCell(3);
+                    newCell.appendChild(document.createTextNode(item.orderStatus));
+
+                    newCell = newRow.insertCell(4);
+                    newCell.appendChild(document.createTextNode('$'+item.amount));
+
+                    newCell = newRow.insertCell(5);
+                    newCell.appendChild(document.createTextNode(item.countryCode));
+                })
+            }
+            
+        }
+    });
+
+    xhr.open("GET", "http://localhost:3000/transaction?email="+email);
+    xhr.setRequestHeader("Content-Type", "application/json");
+
+    xhr.send();
+
+}
+</script>
+
+</html>

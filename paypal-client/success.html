@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang=en>
+
+<head>
+  <meta charset=utf-8>
+  <title>Paypal Success Page</title>
+</head>
+
+<body>
+  <h1>Order Completed</h1>
+  <div id="content"></div>
+</body>
+<script type="text/javascript" langu>
+	let getOrderDetails = () => {
+		const token_list = new URLSearchParams(window.location.search);
+		if (token_list.has("token")){
+			let token = token_list.get("token");
+		    var xhr = new XMLHttpRequest();
+		    xhr.withCredentials = true;
+		    xhr.addEventListener("readystatechange", function() {
+		        if (this.readyState === 4) {
+		            response = JSON.parse(this.responseText);
+		            document.getElementById("content").innerHTML = 'Payer Name: ' + response.payer.name.given_name + ' ' + response.payer.name.surname +'<br>' + 'Email: ' + response.payer.email_address + '<br>' + 'Payer Id: '+ response.payer.payer_id;
+		        }
+		    });
+		    xhr.onerror = function () {
+				console.log("** An error occurred during the transaction");
+			};
+
+		    xhr.open("GET", "http://localhost:3000/order/"+token);
+		    xhr.setRequestHeader("Content-Type", "application/json");
+
+		    xhr.send();
+		}
+	}
+	window.addEventListener('load', getOrderDetails);
+</script>
+</html>
