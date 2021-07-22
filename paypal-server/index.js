@@ -1,7 +1,7 @@
 const express = require('express')
 require('express-async-errors');
 const app = express()
-const port = 3000
+const port = 443
 app.use(express.json())
 var cors = require('cors');
 const mongoose = require("mongoose");
@@ -24,7 +24,7 @@ const connectToDB = async ()=>{
 }
 
 app.listen(port, async () => {
-    //app is listening at port 3000
+    //app is listening at port 443
     console.log(`Example app listening at http://localhost:${port}`);
     try{
         await connectToDB()
