@@ -17,14 +17,18 @@ app.use((err, req, res, next)=>{
 })
 
 
-const connectToDB = ()=>{
+const connectToDB = async ()=>{
     //TODO: create connection with mongoDB 
-    const dbURL = "mongodb://${config.hostURL}:${config.hostPort}/paypalIntegration";
+    const dbURL = `mongodb://${config.hostURL}:${config.hostPort}/paypalIntegration`;
     mongoose.connect(dbURL, {useNewUrlParser: true, useUnifiedTopology: true});
 }
 
-app.listen(port, () => {
+app.listen(port, async () => {
     //app is listening at port 3000
     console.log(`Example app listening at http://localhost:${port}`);
-    connectToDB()
+    try{
+        await connectToDB()
+    }catch(err){
+        console.log(err);
+    }
 });
